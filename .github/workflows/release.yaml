@@ -11,20 +11,22 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ macos-11, ubuntu-20.04, windows-latest ]
+#        os: [ macos-12, ubuntu-20.04, windows-latest ]
+        os: [ macos-12 ]
     name: Build Binary for ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     steps:
       - uses: dtolnay/rust-toolchain@1.66.1
         with:
           components: rustfmt
-      - name: update cargo index
-        continue-on-error: true
-        run: cargo install empty-library
-      - name: setup node
-        uses: actions/setup-node@v3
+#      - name: update cargo index
+#        continue-on-error: true
+#        run: cargo install empty-library
+      - name: uninstall llvm
+        run: brew uninstall --force llvm
+      - uses: maxim-lobanov/setup-xcode@v1
         with:
-          node-version: 18
+          xcode-version: latest-stable
       - name: install dependencies (ubuntu only)
         if: matrix.os == 'ubuntu-20.04'
         run: |
@@ -39,15 +41,12 @@ jobs:
           name: Set LIBCLANG_PATH
           run: echo "LIBCLANG_PATH=$((gcm clang).source -replace "clang.exe")" >> $env:GITHUB_ENV
       - uses: actions/checkout@v3
-      - uses: Swatinem/rust-cache@v2
+      - name: setup node
+        uses: actions/setup-node@v3
         with:
-          # The cargo workspaces and target directory configuration.
-          # These entries are separated by newlines and have the form
-          # `$workspace -> $target`. The `$target` part is treated as a directory
-          # relative to the `$workspace` and defaults to "target" if not explicitly given.
-          # default: ". -> target"
-           workspaces: ./src-tauri
-
+          node-version: 18
+          cache: 'yarn'
+      - uses: Swatinem/rust-cache@v2
       - name: yarn installation
         run: yarn install
       - name: Build Tauri
