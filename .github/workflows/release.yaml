@@ -50,14 +50,13 @@ jobs:
         if: matrix.os == 'windows-latest'
         run: echo "LIBCLANG_PATH=$((gcm clang).source -replace "clang.exe")" >> $env:GITHUB_ENV
 
-        # Package the windows dependencies
+      # Package the windows dependencies
       - name: copy gmp.dll
         if: matrix.os == 'windows-latest'
         run: |
           $var = (get-item $(rustup which rustc)).Directory.Parent.FullName+ '\lib\rustlib\'  + (rustc -vV | findstr "host:*").split(':')[1].Trim() + '\lib'
           Copy-Item ('${{ github.workspace }}' + '\.github' + '\redist' + '\x86_64\*')  -Destination $var -Recurse
-
-      #          C:\Users\Administrator\.rustup\toolchains\1.66.1-x86_64-pc-windows-msvc\bin\rustc.exe
+#          Copy-Item ('${{ github.workspace }}' + '\.github' + '\redist' + '\x86_64\*')  -Destination '${{ github.workspace }}' + '\target' + '\release' -Recurse
 
 ########  CACHE  ########
 
@@ -84,14 +83,11 @@ jobs:
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # TAURI_PRIVATE_KEY: ${{secrets.TAURI_PRIVATE_KEY}}
-          # TAURI_KEY_PASSWORD: ${{secrets.TAURI_KEY_PASSWORD}}
-
-          TAURI_PRIVATE_KEY: dW50cnVzdGVkIGNvbW1lbnQ6IHJzaWduIGVuY3J5cHRlZCBzZWNyZXQga2V5ClJXUlRZMEl5N1FKS0ZZM1BwL25GaFdKU0tpNW5XREQyZnZjQTdkVWZSYUZWV0U5YThIUUFBQkFBQUFBQUFBQUFBQUlBQUFBQVp5dlhYNTlMa0c1OHMxK2hxWXNJWHc2VXVRZnRPUVR3TjloZTJTdXIrQnV2aXFSbTczWjNkdTlOU214YXhnVXA3SmNQQ3VzemlMV2ZKTWVNZTA0SWRraHU0VFJGbXI3UXpsTkREditxV1hFWUQ2MlVZam5lSDJ2OFA1Z05hZnY0U21mOWZxZ0JnZUk9Cg==
-          TAURI_KEY_PASSWORD: 123456
+          TAURI_PRIVATE_KEY: ${{secrets.TAURI_PRIVATE_KEY}}
+          TAURI_KEY_PASSWORD: ${{secrets.TAURI_KEY_PASSWORD}}
         with:
           args: ${{contains(github.ref, 'canary') && '--features carpe-canary' || '' }} #pass the rust feature flags for canary if the tag includes "canary"
-          tagName: ${{contains(github.ref, 'canary') && 'v__VERSION__' || 'v__VERSION__-canary' }} # the action automatically replaces \_\_VERSION\_\_ with the app version
+          tagName: ${{contains(github.ref, 'canary') && 'v__VERSION__-canary' ||  'v__VERSION__' }} # the action automatically replaces \_\_VERSION\_\_ with the app version
           releaseName: 'Carpe v__VERSION__'
           # tagName: app-v__VERSION__ # the action automatically replaces \_\_VERSION\_\_ with the app version
           # releaseName: 'Carpe v__VERSION__'
