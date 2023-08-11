@@ -44,7 +44,6 @@ jobs:
         run: export CARGO_BUILD_TARGET='universal-apple-darwin'
 
 ########  WIN  ########
-
       - name: install dependencies (windows only)
         if: matrix.os == 'windows-latest'
         uses: KyleMayes/install-llvm-action@v1
